@@ -1,16 +1,59 @@
-# React + Vite
+# StockTrade - Portfolio Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive online stock trading and portfolio management system.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dashboard**: Overview of account balance, total portfolio value, order history, and quick actions.
+- **Portfolio**: Real-time view of your current holdings, average cost, LTP, current value, and P&L.
+- **Trade**: Execution terminal to simulate buying and selling stocks with instant margin validation.
+- **Orders**: A detailed order book tracking executed buy/sell transactions.
+- **Authentication**: Simulated login flow with session preservation.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 18+ (Vite)
+- **Styling**: Tailwind CSS v4
+- **Routing**: React Router v6
+- **State Management**: React Context API
+- **API Simulation**: Axios + Axios Mock Adapter
+- **Icons**: Lucide React
+- **Notifications**: React Hot Toast
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+- Node.js (v18+)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/rehanreghunath/StockTrade.git
+cd StockTrade
+```
+
+2. Install dependencies for the frontend:
+```bash
+cd frontend
+npm install
+```
+
+3. Start the Vite development server:
+```bash
+npm run dev
+```
+
+4. Open `http://localhost:5173` in your browser.
+
+## Login Details (Mock)
+- **Email**: `user@zerodha.com`
+- (No password required for mock login)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
