@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { getUserAccount, getPortfolio } from '../api/services';
+import { getUserAccount, getPortfolio, addFunds } from '../api/services';
 import StatCard from '../components/StatCard';
-import { Wallet, PieChart, TrendingUp, AlertCircle, ArrowRight, History } from 'lucide-react';
+import { Wallet, PieChart, TrendingUp, AlertCircle, ArrowRight, History, PlusCircle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -12,6 +12,9 @@ const Dashboard = () => {
     const [portfolio, setPortfolio] = useState([]);
     const [loading, setLoading] = useState(true);
     const [renderError, setRenderError] = useState(null);
+    const [showFundsModal, setShowFundsModal] = useState(false);
+    const [fundsAmount, setFundsAmount] = useState('');
+    const [fundsLoading, setFundsLoading] = useState(false);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -55,6 +58,27 @@ const Dashboard = () => {
         }
     }, [user]);
 
+    const handleAddFunds = async (e) => {
+        e.preventDefault();
+        const amount = parseFloat(fundsAmount);
+        if (!amount || amount <= 0) {
+            toast.error('Enter a valid amount');
+            return;
+        }
+        setFundsLoading(true);
+        try {
+            const res = await addFunds(account.id, amount);
+            setAccount(prev => ({ ...prev, balance: res.data.balance }));
+            toast.success(`₹${amount.toLocaleString('en-IN')} added successfully`);
+            setShowFundsModal(false);
+            setFundsAmount('');
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to add funds');
+        } finally {
+            setFundsLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
@@ -81,6 +105,7 @@ const Dashboard = () => {
     const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
 
     return (
+        <>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Hello, {user.name}</h1>
@@ -113,7 +138,7 @@ const Dashboard = () => {
                     <div className="p-6 border-b border-gray-200">
                         <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
                     </div>
-                    <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <Link to="/trade" className="flex flex-col items-center justify-center p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors text-primary font-medium group text-center">
                             <TrendingUp size={24} className="mb-2 group-hover:scale-110 transition-transform" />
                             Trade Now
@@ -126,6 +151,10 @@ const Dashboard = () => {
                             <History size={24} className="mb-2 group-hover:scale-110 transition-transform" />
                             Order History
                         </Link>
+                        <button onClick={() => setShowFundsModal(true)} className="flex flex-col items-center justify-center p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors text-amber-700 font-medium group text-center w-full">
+                            <PlusCircle size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                            Add Funds
+                        </button>
                     </div>
                 </div>
 
@@ -172,6 +201,49 @@ const Dashboard = () => {
                 </div>
             </div>
         </div>
+
+            {/* Add Funds Modal */}
+            {showFundsModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex justify-between items-center mb-5">
+                            <h2 className="text-lg font-bold text-gray-900">Add Funds</h2>
+                            <button onClick={() => setShowFundsModal(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">
+                            Current balance: <span className="font-semibold text-gray-800">₹{account?.balance?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </p>
+                        <form onSubmit={handleAddFunds} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    step="any"
+                                    required
+                                    value={fundsAmount}
+                                    onChange={(e) => setFundsAmount(e.target.value)}
+                                    className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g. 10000"
+                                    autoFocus
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={fundsLoading}
+                                className="w-full py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                            >
+                                {fundsLoading ? (
+                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : 'Add Funds'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

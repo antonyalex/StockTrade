@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { getOrders } from '../api/services';
+import { getOrders, getUserAccount } from '../api/services';
 import toast from 'react-hot-toast';
-import { History, CheckCircle, Clock } from 'lucide-react';
+import { History, CheckCircle, Clock, Search } from 'lucide-react';
 
 const Orders = () => {
     const { user } = useAuth();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filterSymbol, setFilterSymbol] = useState('');
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await getOrders(user.id);
+                const accountRes = await getUserAccount(user.id);
+                const res = await getOrders(accountRes.data.id);
                 setOrders(res.data);
             } catch (error) {
                 console.error(error);
@@ -43,6 +45,16 @@ const Orders = () => {
                     </h1>
                     <p className="text-gray-500 mt-1">View your recent transactions and order history</p>
                 </div>
+                <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        value={filterSymbol}
+                        onChange={(e) => setFilterSymbol(e.target.value.toUpperCase())}
+                        placeholder="Filter by symbol"
+                        className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                </div>
             </div>
 
             <div className="bg-surface shadow-sm rounded-xl border border-gray-200 overflow-hidden">
@@ -66,16 +78,22 @@ const Orders = () => {
                                     <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                         Price
                                     </th>
+                                    <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                        Total Value
+                                    </th>
                                     <th scope="col" className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {orders.map((order) => {
+                                {orders
+                                    .filter(o => !filterSymbol || o.stockSymbol.includes(filterSymbol))
+                                    .map((order) => {
                                     const orderDate = new Date(order.date);
                                     const formattedTime = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
                                     const formattedDate = orderDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                                    const totalValue = order.quantity * order.executedPrice;
 
                                     return (
                                         <tr key={order.id} className="hover:bg-gray-50 transition-colors">
@@ -96,6 +114,9 @@ const Orders = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-700">
                                                 ₹{order.executedPrice.toFixed(2)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900">
+                                                ₹{totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <span className="inline-flex items-center gap-1 text-sm font-medium text-success">

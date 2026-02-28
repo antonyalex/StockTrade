@@ -1,24 +1,25 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { TrendingUp, KeyRound } from 'lucide-react';
+import { TrendingUp, UserPlus } from 'lucide-react';
 
-const Login = () => {
+const Register = () => {
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { register } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const result = await login(email, password);
+        const result = await register(name, email, password);
 
         if (result.success) {
-            toast.success('Successfully logged in!');
+            toast.success('Account created! Welcome to StockTrade.');
             navigate('/dashboard');
         } else {
             toast.error(result.error);
@@ -36,22 +37,40 @@ const Login = () => {
                     </div>
                 </div>
                 <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-                    Welcome to StockTrade
+                    Create your account
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    Sign in to manage your portfolio
+                    Start managing your stock portfolio today
                 </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-surface py-8 px-4 shadow sm:rounded-xl sm:px-10 border border-gray-100 relative overflow-hidden">
+                <div className="bg-surface py-8 px-4 shadow sm:rounded-xl sm:px-10 border border-gray-100">
+                    <form className="space-y-5" onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                Full name
+                            </label>
+                            <div className="mt-1">
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    autoComplete="name"
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all sm:text-sm"
+                                    placeholder="Alex Johnson"
+                                />
+                            </div>
+                        </div>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email address
                             </label>
-                            <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="mt-1">
                                 <input
                                     id="email"
                                     name="email"
@@ -70,12 +89,12 @@ const Login = () => {
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
                             </label>
-                            <div className="mt-1 relative rounded-md shadow-sm">
+                            <div className="mt-1">
                                 <input
                                     id="password"
                                     name="password"
                                     type="password"
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -95,8 +114,8 @@ const Login = () => {
                                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                                 ) : (
                                     <>
-                                        <KeyRound size={18} />
-                                        Sign in
+                                        <UserPlus size={18} />
+                                        Create account
                                     </>
                                 )}
                             </button>
@@ -104,10 +123,10 @@ const Login = () => {
                     </form>
 
                     <p className="mt-6 text-center text-sm text-gray-600">
-                        Don&apos;t have an account?{' '}
-                        <a href="/register" className="font-medium text-primary hover:text-blue-700">
-                            Create one
-                        </a>
+                        Already have an account?{' '}
+                        <Link to="/login" className="font-medium text-primary hover:text-blue-700">
+                            Sign in
+                        </Link>
                     </p>
                 </div>
             </div>
@@ -115,4 +134,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;

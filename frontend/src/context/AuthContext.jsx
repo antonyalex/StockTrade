@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loginUser } from '../api/services';
+import { loginUser, registerUser } from '../api/services';
 import { AuthContext } from './ContextDef';
 
 export const AuthProvider = ({ children }) => {
@@ -17,10 +17,10 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = async (email) => {
+    const login = async (email, password) => {
         setLoading(true);
         try {
-            const response = await loginUser(email);
+            const response = await loginUser(email, password);
             const { user: userData, token } = response.data;
 
             setUser(userData);
@@ -36,6 +36,25 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (name, email, password) => {
+        setLoading(true);
+        try {
+            const response = await registerUser(name, email, password);
+            const { user: userData, token } = response.data;
+
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+            localStorage.setItem('token', token);
+
+            return { success: true };
+        } catch (error) {
+            const msg = error.response?.data?.error || error.message || 'Registration failed';
+            return { success: false, error: msg };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
@@ -43,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
             {!loading && children}
         </AuthContext.Provider>
     );
