@@ -19,28 +19,18 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [accountRes, portfolioRes] = await Promise.all([
-                    getUserAccount(user.id),
-                    getPortfolio(user.id)
-                ]);
+                const accountRes = await getUserAccount(user.id);
+                const account = accountRes.data;
+                setAccount(account);
 
-                setAccount(accountRes.data);
-
-                // Enrich portfolio with calculated values for quick stats
-                const enrichedPortfolio = portfolioRes.data.map(item => {
-                    // since we don't have real-time current price in simple portfolio mock, 
-                    // we approximate it for dashboard display by adding a dummy variance
-                    const currentPrice = item.averagePrice * (1 + (Math.random() * 0.1 - 0.05));
-                    return {
-                        ...item,
-                        currentPrice,
-                        holdingValue: item.quantity * currentPrice
-                    };
-                });
+                const portfolioRes = await getPortfolio(account.id);
+                const enrichedPortfolio = portfolioRes.data.map(item => ({
+                    ...item,
+                    holdingValue: item.quantity * item.currentPrice
+                }));
 
                 setPortfolio(enrichedPortfolio);
 
-                // Update account portfolio value dynamically
                 const totalValue = enrichedPortfolio.reduce((acc, curr) => acc + curr.holdingValue, 0);
                 setAccount(prev => ({ ...prev, portfolioValue: totalValue }));
 
@@ -94,10 +84,6 @@ const Dashboard = () => {
             </div>
         );
     }
-
-    console.log("Dashboard - user:", user);
-    console.log("Dashboard - account:", account);
-    console.log("Dashboard - portfolio:", portfolio);
 
     const totalInvestment = portfolio.reduce((acc, curr) => acc + (curr.quantity * curr.averagePrice), 0);
     const totalValue = account?.portfolioValue || 0;

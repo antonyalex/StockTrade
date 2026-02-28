@@ -21,15 +21,10 @@ const Portfolio = () => {
                 setAccountId(accId);
                 const res = await getPortfolio(accId);
 
-                // Add random dummy variance to simulate current price for UI logic
-                const enrichedPortfolio = res.data.map(item => {
-                    const currentPrice = item.averagePrice * (1 + (Math.random() * 0.1 - 0.05));
-                    return {
-                        ...item,
-                        currentPrice,
-                        holdingValue: item.quantity * currentPrice
-                    };
-                });
+                const enrichedPortfolio = res.data.map(item => ({
+                    ...item,
+                    holdingValue: item.quantity * item.currentPrice
+                }));
 
                 setPortfolio(enrichedPortfolio);
             } catch (error) {
@@ -62,8 +57,7 @@ const Portfolio = () => {
             const res = await getPortfolio(accountId);
             const enriched = res.data.map(item => ({
                 ...item,
-                currentPrice: item.averagePrice * (1 + (Math.random() * 0.1 - 0.05)),
-                holdingValue: item.quantity * item.averagePrice
+                holdingValue: item.quantity * item.currentPrice
             }));
             setPortfolio(enriched);
         } catch (err) {
